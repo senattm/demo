@@ -10,7 +10,7 @@ const Hero: React.FC = () => {
     <div className="relative h-screen w-full overflow-hidden">
       <div className="absolute inset-0">
         <img
-          src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1920&q=80"
+          src="https://images.unsplash.com/photo-1549439602-43ebca2327af?q=80&w=1920&auto=format&fit=crop"
           alt="Premium Moda"
           className="w-full h-full object-cover"
         />
