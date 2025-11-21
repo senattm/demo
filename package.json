@@ -1,0 +1,22 @@
+{
+  "name": "premium-fashion-ecommerce",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Premium Fashion E-Commerce Platform",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:client\" \"npm run dev:server\"",
+    "dev:client": "cd client && npm run dev",
+    "dev:server": "cd server && npm run dev",
+    "install:all": "npm install && cd client && npm install && cd ../server && npm install"
+  },
+  "keywords": [
+    "ecommerce",
+    "fashion",
+    "luxury"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
