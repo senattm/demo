@@ -1,13 +1,61 @@
-import React from "react";
-import { motion } from "framer-motion";
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useCartStore } from "@/store/useCartStore";
+import { useNotificationStore } from "@/store/useNotificationStore";
 import Button from "@/components/Button";
 
 const Cart: React.FC = () => {
   const { items, removeItem, updateQuantity, getTotalPrice, clearCart } =
     useCartStore();
+  const addNotification = useNotificationStore(
+    (state) => state.addNotification
+  );
   const navigate = useNavigate();
+  const [confirmRemove, setConfirmRemove] = useState<{
+    productId: string;
+    productName: string;
+  } | null>(null);
+
+  const FREE_SHIPPING_THRESHOLD = 2000;
+  const SHIPPING_COST = 50;
+  const totalPrice = getTotalPrice();
+  const shippingCost =
+    totalPrice >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
+
+  const handleUpdateQuantity = (
+    productId: string,
+    currentQuantity: number,
+    productName: string
+  ) => {
+    const newQuantity = currentQuantity - 1;
+
+    if (newQuantity === 0) {
+      setConfirmRemove({ productId, productName });
+    } else {
+      updateQuantity(productId, newQuantity);
+    }
+  };
+
+  const handleConfirmRemove = () => {
+    if (confirmRemove) {
+      removeItem(confirmRemove.productId);
+      addNotification(
+        `${confirmRemove.productName} sepetten kaldırıldı`,
+        "info"
+      );
+      setConfirmRemove(null);
+    }
+  };
+
+  const handleCancelRemove = () => {
+    setConfirmRemove(null);
+  };
+
+  const handleClearCart = () => {
+    clearCart();
+    addNotification("Sepet temizlendi", "warning");
+  };
 
   if (items.length === 0) {
     return (
@@ -81,37 +129,29 @@ const Cart: React.FC = () => {
                     ₺{item.product.price.toFixed(2)}
                   </p>
 
-                  <div className="flex items-center space-x-4">
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() =>
-                          updateQuantity(
-                            item.product.id,
-                            Math.max(1, item.quantity - 1)
-                          )
-                        }
-                        className="w-8 h-8 border border-black flex items-center justify-center hover:bg-black hover:text-white transition-colors"
-                      >
-                        -
-                      </button>
-                      <span className="font-body w-8 text-center">
-                        {item.quantity}
-                      </span>
-                      <button
-                        onClick={() =>
-                          updateQuantity(item.product.id, item.quantity + 1)
-                        }
-                        className="w-8 h-8 border border-black flex items-center justify-center hover:bg-black hover:text-white transition-colors"
-                      >
-                        +
-                      </button>
-                    </div>
-
+                  <div className="flex items-center space-x-2">
                     <button
-                      onClick={() => removeItem(item.product.id)}
-                      className="font-body text-sm text-red-600 hover:text-red-700 transition-colors"
+                      onClick={() =>
+                        handleUpdateQuantity(
+                          item.product.id,
+                          item.quantity,
+                          item.product.name
+                        )
+                      }
+                      className="w-8 h-8 border border-black flex items-center justify-center hover:bg-red-600 hover:text-white hover:border-red-600 transition-colors"
                     >
-                      Kaldır
+                      -
+                    </button>
+                    <span className="font-body w-8 text-center">
+                      {item.quantity}
+                    </span>
+                    <button
+                      onClick={() =>
+                        updateQuantity(item.product.id, item.quantity + 1)
+                      }
+                      className="w-8 h-8 border border-black flex items-center justify-center hover:bg-black hover:text-white transition-colors"
+                    >
+                      +
                     </button>
                   </div>
                 </div>
@@ -140,22 +180,52 @@ const Cart: React.FC = () => {
                 <div className="flex justify-between">
                   <span className="text-gray-700">Ara Toplam</span>
                   <span className="font-semibold">
-                    ₺{getTotalPrice().toFixed(2)}
+                    ₺{totalPrice.toLocaleString("tr-TR")}
                   </span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-700">Kargo</span>
-                  <span className="font-semibold">ÜCRETSİZ</span>
+                <div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-700">Kargo</span>
+                    <span
+                      className={`font-semibold ${
+                        shippingCost === 0 ? "text-green-600" : ""
+                      }`}
+                    >
+                      {shippingCost === 0
+                        ? "ÜCRETSİZ"
+                        : `₺${shippingCost.toLocaleString("tr-TR")}`}
+                    </span>
+                  </div>
+                  {totalPrice < FREE_SHIPPING_THRESHOLD && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      ₺
+                      {(FREE_SHIPPING_THRESHOLD - totalPrice).toLocaleString(
+                        "tr-TR"
+                      )}{" "}
+                      daha alışveriş yapın, kargo ücretsiz!
+                    </p>
+                  )}
+                  {totalPrice >= FREE_SHIPPING_THRESHOLD && (
+                    <p className="text-xs text-green-600 mt-1">
+                      ₺2.000 üstü ücretsiz kargo
+                    </p>
+                  )}
                 </div>
                 <div className="border-t pt-4 flex justify-between text-xl">
                   <span className="font-semibold">Toplam</span>
                   <span className="font-semibold">
-                    ₺{getTotalPrice().toFixed(2)}
+                    ₺{(totalPrice + shippingCost).toLocaleString("tr-TR")}
                   </span>
                 </div>
               </div>
 
-              <Button variant="primary" size="lg" fullWidth className="mb-4">
+              <Button
+                variant="primary"
+                size="lg"
+                fullWidth
+                className="mb-4"
+                onClick={() => navigate("/checkout")}
+              >
                 Ödemeye Geç
               </Button>
 
@@ -169,7 +239,7 @@ const Cart: React.FC = () => {
               </Button>
 
               <button
-                onClick={clearCart}
+                onClick={handleClearCart}
                 className="w-full mt-4 font-body text-sm text-gray-600 hover:text-black transition-colors"
               >
                 Sepeti Temizle
@@ -178,6 +248,51 @@ const Cart: React.FC = () => {
           </motion.div>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      <AnimatePresence>
+        {confirmRemove && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black bg-opacity-30"
+              onClick={handleCancelRemove}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              className="relative bg-white p-6 max-w-sm w-full shadow-xl z-10"
+            >
+              <h3 className="font-display text-xl text-black mb-3 text-center">
+                Ürünü kaldırmak istediğinize emin misiniz?
+              </h3>
+
+              <p className="font-body text-sm text-gray-600 mb-6 text-center">
+                {confirmRemove.productName}
+              </p>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={handleCancelRemove}
+                  className="flex-1 px-4 py-2.5 border border-black font-body text-sm text-black hover:bg-gray-50 transition-colors"
+                >
+                  İptal
+                </button>
+                <button
+                  onClick={handleConfirmRemove}
+                  className="flex-1 px-4 py-2.5 bg-black font-body text-sm text-white hover:bg-gray-800 transition-colors"
+                >
+                  Kaldır
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

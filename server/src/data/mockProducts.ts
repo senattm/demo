@@ -8,8 +8,7 @@ export const mockProducts: Product[] = [
     price: 12990.00,
     description: 'İtalyan yünü ile mükemmel işçilikle hazırlanmış modern slim fit takım elbise. Yönetici toplantıları ve resmi etkinlikler için ideal. Elle dikilmiş yakalı ve sedef düğmeli.',
     images: [
-      'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=800&q=80',
-      'https://images.unsplash.com/photo-1593030761757-71fae45fa0e7?w=800&q=80'
+      'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=800&q=80'
     ],
     sizes: ['S', 'M', 'L', 'XL'],
     colors: ['Gece Mavisi', 'Antrasit'],
@@ -26,8 +25,7 @@ export const mockProducts: Product[] = [
     price: 24990.00,
     description: 'Lüks ipek charmeuse kumaştan hazırlanmış büyüleyici yere kadar uzanan gece elbisesi. Zarif bir yaka ve çarpıcı açık sırt tasarımına sahiptir. Kırmızı halı hazır.',
     images: [
-      'https://images.unsplash.com/photo-1566174053879-31528523f8ae?w=800&q=80',
-      'https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=800&q=80'
+      'https://images.unsplash.com/photo-1566174053879-31528523f8ae?w=800&q=80'
     ],
     sizes: ['XS', 'S', 'M', 'L'],
     colors: ['Zümrüt', 'Bordo', 'Siyah'],
@@ -44,8 +42,7 @@ export const mockProducts: Product[] = [
     price: 3290.00,
     description: 'İnce dokuya sahip zamansız Mısır pamuğu gömlek. Hem iş hem de şık günlük kullanım için idealdir. Fransız manşetli ve hakiki sedef düğmeleri vardır.',
     images: [
-      'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=800&q=80',
-      'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=800&q=80'
+      'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=800&q=80'
     ],
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
     colors: ['Beyaz', 'Açık Mavi', 'Pembe'],
@@ -62,8 +59,7 @@ export const mockProducts: Product[] = [
     price: 18990.00,
     description: 'Premium kaşmir karışımında sofistike palto. Çentik yakalı, çift sıra düğmeli ve zarafet yayan rafine terziliğe sahiptir.',
     images: [
-      'https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=800&q=80',
-      'https://images.unsplash.com/photo-1548126032-079a5f68d32b?w=800&q=80'
+      'https://images.unsplash.com/photo-1539533018447-63fcce2678e3?w=800&q=80'
     ],
     sizes: ['M', 'L', 'XL'],
     colors: ['Deve Tüyü', 'Lacivert', 'Siyah'],
@@ -80,8 +76,7 @@ export const mockProducts: Product[] = [
     price: 8990.00,
     description: 'Göz alıcı kadifeden diz boyu kokteyl elbisesi. Vücut hatlarını saran üst gövde ve genişleyen etek tasarımına sahiptir. Akşam toplantıları ve özel etkinlikler için mükemmel.',
     images: [
-      'https://images.unsplash.com/photo-1566174053879-31528523f8ae?w=800&q=80',
-      'https://images.unsplash.com/photo-1585487000160-6ebcfceb0d03?w=800&q=80'
+      'https://images.unsplash.com/photo-1566174053879-31528523f8ae?w=800&q=80'
     ],
     sizes: ['XS', 'S', 'M', 'L', 'XL'],
     colors: ['Koyu Mor', 'Orman Yeşili', 'Lacivert'],
@@ -98,8 +93,7 @@ export const mockProducts: Product[] = [
     price: 2790.00,
     description: 'Rahat kesimli hafif keten gömlek. Sıcak havalarda sofistike bir tarz için mükemmel. Hakiki boynuz düğmeler ve kamp yakalı.',
     images: [
-      'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=800&q=80',
-      'https://images.unsplash.com/photo-1620799140188-3b2a02fd9a77?w=800&q=80'
+      'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=800&q=80'
     ],
     sizes: ['S', 'M', 'L', 'XL'],
     colors: ['Beyaz', 'Kum', 'Gök Mavisi'],
@@ -116,8 +110,7 @@ export const mockProducts: Product[] = [
     price: 1990.00,
     description: 'Toskana\'dan el yapımı deri kemer. Cilalı pirinç toka ve kenar boyama özelliği vardır. Her kıyafete mükemmel son dokunuş.',
     images: [
-      'https://images.unsplash.com/photo-1624222247344-550fb60583e2?w=800&q=80',
-      'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800&q=80'
+      'https://images.unsplash.com/photo-1624222247344-550fb60583e2?w=800&q=80'
     ],
     sizes: ['30', '32', '34', '36', '38'],
     colors: ['Siyah', 'Konyak', 'Koyu Kahverengi'],
@@ -134,8 +127,7 @@ export const mockProducts: Product[] = [
     price: 3990.00,
     description: 'Ultra ince merino yün balıkçı yaka. Yumuşak, nefes alabilen ve sıcaklık düzenleyici. Gardırobunuz için çok yönlü bir temel.',
     images: [
-      'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=800&q=80',
-      'https://images.unsplash.com/photo-1617127365659-c47fa864d8bc?w=800&q=80'
+      'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=800&q=80'
     ],
     sizes: ['XS', 'S', 'M', 'L', 'XL'],
     colors: ['Siyah', 'Antrasit', 'Krem', 'Lacivert'],

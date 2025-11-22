@@ -4,7 +4,7 @@ import { User } from '@/types';
 
 interface UserStore {
   user: User;
-  setUser: (user: User) => void;
+  login: (user: User) => void;
   logout: () => void;
 }
 
@@ -17,7 +17,7 @@ export const useUserStore = create<UserStore>()(
     (set) => ({
       user: defaultUser,
 
-      setUser: (user) => {
+      login: (user) => {
         set({ user });
       },
 
