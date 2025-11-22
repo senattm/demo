@@ -13,6 +13,7 @@ import Auth from '@/pages/Auth';
 import Profile from '@/pages/Profile';
 import Orders from '@/pages/Orders';
 import Favorites from '@/pages/Favorites';
+import NotFound from '@/pages/NotFound';
 
 const App: React.FC = () => {
   return (
@@ -33,15 +34,8 @@ const App: React.FC = () => {
             <Route path="/orders" element={<Orders />} />
             <Route path="/favorites" element={<Favorites />} />
             
-            {/* Placeholder routes */}
-            <Route path="/contact" element={
-              <div className="min-h-screen pt-24 flex items-center justify-center">
-                <div className="text-center">
-                  <h1 className="font-display text-5xl text-black mb-4">İletişim</h1>
-                  <p className="font-body text-gray-600">Çok Yakında</p>
-                </div>
-              </div>
-            } />
+            {/* 404 - Catch all routes */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
 

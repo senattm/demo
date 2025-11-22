@@ -5,14 +5,24 @@ import { useCartStore } from "@/store/useCartStore";
 import { useUserStore } from "@/store/useUserStore";
 import { useNotificationStore } from "@/store/useNotificationStore";
 import { useOrderStore } from "@/store/useOrderStore";
+import { useCouponStore } from "@/store/useCouponStore";
+import { FREE_SHIPPING_THRESHOLD, SHIPPING_COST } from "@/constants";
 import Button from "@/components/Button";
 
 const Checkout: React.FC = () => {
   const { items, getTotalPrice, clearCart } = useCartStore();
   const user = useUserStore((state) => state.user);
   const addNotification = useNotificationStore((state) => state.addNotification);
-  const addOrder = useOrderStore((state) => state.addOrder);
+  const { addOrder, orders } = useOrderStore();
+  const { firstOrderDiscount, applyFirstOrderDiscount, removeDiscount, getDiscount } = useCouponStore();
   const navigate = useNavigate();
+
+  const [selectedAddressId, setSelectedAddressId] = useState<string>("");
+  const [useNewAddress, setUseNewAddress] = useState(true);
+  const [discountCode, setDiscountCode] = useState("");
+  
+  const userOrders = orders.filter((order) => order.userId === user.id);
+  const hasOrders = userOrders.length > 0;
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -114,6 +124,11 @@ const Checkout: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!useNewAddress && !selectedAddressId && user.addresses && user.addresses.length > 0) {
+      addNotification("Lütfen bir teslimat adresi seçin", "error");
+      return;
+    }
+    
     if (!validateEmail(formData.email)) {
       addNotification("Geçerli bir e-posta adresi giriniz", "error");
       return;
@@ -144,6 +159,15 @@ const Checkout: React.FC = () => {
       return;
     }
     
+    let deliveryAddress = formData.address;
+    
+    if (!useNewAddress && selectedAddressId) {
+      const selectedAddress = user.addresses?.find((addr) => addr.id === selectedAddressId);
+      if (selectedAddress) {
+        deliveryAddress = `${selectedAddress.address}, ${selectedAddress.district}, ${selectedAddress.city} ${selectedAddress.postalCode}`;
+      }
+    }
+
     const orderNumber = `ORD-${Date.now()}`;
     const order = {
       id: Math.random().toString(36).substring(7),
@@ -165,7 +189,7 @@ const Checkout: React.FC = () => {
         lastName: formData.lastName,
         email: formData.email,
         phone: `${formData.phoneCountry} ${formData.phone}`,
-        address: formData.address,
+        address: deliveryAddress,
       },
       status: "pending" as const,
       createdAt: new Date(),
@@ -174,6 +198,7 @@ const Checkout: React.FC = () => {
     addOrder(order);
     addNotification("Siparişiniz başarıyla oluşturuldu!", "success");
     clearCart();
+    removeDiscount();
     
     setTimeout(() => {
       if (user.isAuthenticated) {
@@ -184,16 +209,37 @@ const Checkout: React.FC = () => {
     }, 2000);
   };
 
+  const handleApplyDiscount = () => {
+    if (!discountCode.trim()) {
+      addNotification("Lütfen bir indirim kodu giriniz", "error");
+      return;
+    }
+
+    const result = applyFirstOrderDiscount(discountCode.trim(), hasOrders);
+    
+    if (result.success) {
+      addNotification(result.message, "success");
+      setDiscountCode("");
+    } else {
+      addNotification(result.message, "error");
+    }
+  };
+
+  const handleRemoveDiscount = () => {
+    removeDiscount();
+    addNotification("İndirim kodu kaldırıldı", "info");
+  };
+
   if (items.length === 0) {
     navigate("/cart");
     return null;
   }
 
   const totalPrice = getTotalPrice();
-  const FREE_SHIPPING_THRESHOLD = 2000;
-  const SHIPPING_COST = 50;
-  const shippingCost = totalPrice >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
-  const finalTotal = totalPrice + shippingCost;
+  const discount = getDiscount(totalPrice);
+  const subtotalAfterDiscount = totalPrice - discount;
+  const shippingCost = subtotalAfterDiscount >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
+  const finalTotal = subtotalAfterDiscount + shippingCost;
 
   return (
     <div className="min-h-screen pt-24 pb-16 bg-white">
@@ -280,18 +326,100 @@ const Checkout: React.FC = () => {
 
                 <div>
                   <h2 className="font-body font-semibold text-xl mb-4">Teslimat Adresi</h2>
-                  <div>
-                    <label className="block font-body text-sm mb-2 text-gray-700">Adres</label>
-                    <textarea
-                      name="address"
-                      value={formData.address}
-                      onChange={handleInputChange}
-                      required
-                      rows={4}
-                      placeholder="Tam adresinizi giriniz (Sokak, Mahalle, İlçe, Şehir vb.)"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg font-body focus:outline-none focus:border-black transition-colors resize-none"
-                    />
-                  </div>
+                  
+                  {user.isAuthenticated && user.addresses && user.addresses.length > 0 && (
+                    <div className="mb-6">
+                      <div className="flex gap-4 mb-4">
+                        <button
+                          type="button"
+                          onClick={() => setUseNewAddress(false)}
+                          className={`flex-1 px-4 py-3 border-2 font-body transition-all ${
+                            !useNewAddress
+                              ? 'border-black bg-black text-white'
+                              : 'border-gray-300 hover:border-gray-400'
+                          }`}
+                        >
+                          Kayıtlı Adreslerim
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setUseNewAddress(true)}
+                          className={`flex-1 px-4 py-3 border-2 font-body transition-all ${
+                            useNewAddress
+                              ? 'border-black bg-black text-white'
+                              : 'border-gray-300 hover:border-gray-400'
+                          }`}
+                        >
+                          Yeni Adres Kullan
+                        </button>
+                      </div>
+
+                      {!useNewAddress && (
+                        <div className="space-y-3 mb-4">
+                          {user.addresses.map((address) => (
+                            <div
+                              key={address.id}
+                              onClick={() => setSelectedAddressId(address.id)}
+                              className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                                selectedAddressId === address.id
+                                  ? 'border-black bg-gray-50'
+                                  : 'border-gray-200 hover:border-gray-300'
+                              }`}
+                            >
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <h3 className="font-body font-semibold flex items-center gap-2 mb-1">
+                                    {address.title}
+                                    {address.isDefault && (
+                                      <span className="text-xs bg-black text-white px-2 py-0.5 rounded">
+                                        Varsayılan
+                                      </span>
+                                    )}
+                                  </h3>
+                                  <p className="font-body text-sm text-gray-600 mb-1">{address.fullName}</p>
+                                  <p className="font-body text-sm text-gray-700">{address.address}</p>
+                                  <p className="font-body text-sm text-gray-700">
+                                    {address.district} / {address.city} - {address.postalCode}
+                                  </p>
+                                  <p className="font-body text-sm font-semibold mt-1">{address.phone}</p>
+                                </div>
+                                <div className="flex-shrink-0 ml-3">
+                                  <div
+                                    className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                                      selectedAddressId === address.id
+                                        ? 'border-black bg-black'
+                                        : 'border-gray-300'
+                                    }`}
+                                  >
+                                    {selectedAddressId === address.id && (
+                                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 12 12">
+                                        <path d="M4.5 9L1.5 6l1-1 2 2 4-4 1 1-5 5z" />
+                                      </svg>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {(useNewAddress || !user.isAuthenticated || !user.addresses || user.addresses.length === 0) && (
+                    <div>
+                      <label className="block font-body text-sm mb-2 text-gray-700">Adres</label>
+                      <textarea
+                        name="address"
+                        value={formData.address}
+                        onChange={handleInputChange}
+                        required={useNewAddress || !user.isAuthenticated || !user.addresses || user.addresses.length === 0}
+                        rows={4}
+                        placeholder="Tam adresinizi giriniz (Sokak, Mahalle, İlçe, Şehir vb.)"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg font-body focus:outline-none focus:border-black transition-colors resize-none"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -397,11 +525,77 @@ const Checkout: React.FC = () => {
                   ))}
                 </div>
 
+                {/* İndirim Kodu */}
+                <div className="border-t border-gray-300 mt-6 pt-6">
+                  {!firstOrderDiscount.isApplied ? (
+                    <div>
+                      <label className="block font-body text-sm font-semibold mb-2">
+                        İndirim Kodu
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={discountCode}
+                          onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+                          placeholder="İLK10"
+                          className="flex-1 px-4 py-2.5 border border-gray-300 font-body text-sm focus:outline-none focus:border-black transition-colors uppercase"
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleApplyDiscount();
+                            }
+                          }}
+                        />
+                        <button
+                          type="button"
+                          onClick={handleApplyDiscount}
+                          className="px-6 py-2.5 bg-black text-white font-body text-sm hover:bg-gray-800 transition-colors whitespace-nowrap"
+                        >
+                          Uygula
+                        </button>
+                      </div>
+                      {!hasOrders && (
+                        <p className="font-body text-xs text-purple-600 mt-2">
+                          💡 İlk alışverişinizde <span className="font-semibold">İLK10</span> koduyla %10 indirim kazanın
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg p-4">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <p className="font-body text-sm font-semibold text-purple-900">
+                            🎉 İlk Sipariş İndirimi Uygulandı
+                          </p>
+                          <p className="font-body text-xs text-purple-700 mt-1">
+                            {firstOrderDiscount.code} - %{firstOrderDiscount.discount} indirim
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleRemoveDiscount}
+                          className="text-red-600 hover:text-red-700 font-body text-sm underline"
+                        >
+                          Kaldır
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 <div className="border-t border-gray-300 mt-6 pt-6 space-y-3">
                   <div className="flex justify-between font-body text-sm">
                     <span className="text-gray-600">Ara Toplam</span>
                     <span>₺{totalPrice.toLocaleString("tr-TR")}</span>
                   </div>
+                  
+                  {discount > 0 && (
+                    <div className="flex justify-between font-body text-sm">
+                      <span className="text-purple-600">İlk Sipariş İndirimi (%{firstOrderDiscount.discount})</span>
+                      <span className="text-purple-600 font-semibold">-₺{discount.toLocaleString("tr-TR")}</span>
+                    </div>
+                  )}
+
                   <div>
                     <div className="flex justify-between font-body text-sm">
                       <span className="text-gray-600">Kargo</span>
@@ -409,12 +603,12 @@ const Checkout: React.FC = () => {
                         {shippingCost === 0 ? "ÜCRETSİZ" : `₺${shippingCost.toLocaleString("tr-TR")}`}
                       </span>
                     </div>
-                    {totalPrice < FREE_SHIPPING_THRESHOLD && (
+                    {subtotalAfterDiscount < FREE_SHIPPING_THRESHOLD && (
                       <p className="font-body text-xs text-gray-500 mt-1">
-                        ₺{(FREE_SHIPPING_THRESHOLD - totalPrice).toLocaleString("tr-TR")} daha alışveriş yapın, kargo ücretsiz olsun!
+                        ₺{(FREE_SHIPPING_THRESHOLD - subtotalAfterDiscount).toLocaleString("tr-TR")} daha alışveriş yapın, kargo ücretsiz olsun!
                       </p>
                     )}
-                    {totalPrice >= FREE_SHIPPING_THRESHOLD && (
+                    {subtotalAfterDiscount >= FREE_SHIPPING_THRESHOLD && (
                       <p className="font-body text-xs text-green-600 mt-1">
                         ₺2.000 üstü ücretsiz kargo
                       </p>

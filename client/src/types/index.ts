@@ -21,10 +21,24 @@ export interface CartItem {
   selectedColor: string;
 }
 
+export interface Address {
+  id: string;
+  title: string;
+  fullName: string;
+  phone: string;
+  address: string;
+  city: string;
+  district: string;
+  postalCode: string;
+  isDefault: boolean;
+}
+
 export interface User {
   id?: string;
   name?: string;
   email?: string;
+  phone?: string;
+  addresses?: Address[];
   isAuthenticated: boolean;
 }
 

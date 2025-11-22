@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import Hero from '@/components/Hero';
 import ProductCard from '@/components/ProductCard';
+import { ProductCardSkeleton } from '@/components/Skeleton';
 import Button from '@/components/Button';
 import { productApi } from '@/api/client';
 import { Product } from '@/types';
@@ -31,6 +32,24 @@ const Home: React.FC = () => {
     <div className="min-h-screen">
       <Hero />
 
+      {/* İlk Sipariş İndirim Bilgilendirmesi */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, delay: 0.3 }}
+        className="bg-black text-white py-3"
+      >
+        <div className="container mx-auto px-6 text-center">
+          <p className="font-body text-sm tracking-wide">
+            İlk alışverişinizde{' '}
+            <span className="font-semibold border-b border-white/50">İLK10</span>{' '}
+            koduyla{' '}
+            <span className="font-semibold">%10 indirim</span>{' '}
+            kazanın
+          </p>
+        </div>
+      </motion.div>
+
       <section className="py-20 bg-white">
         <div className="container mx-auto px-6 lg:px-12">
           <motion.div
@@ -49,8 +68,10 @@ const Home: React.FC = () => {
           </motion.div>
 
           {loading ? (
-            <div className="flex justify-center items-center py-20">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+              {[...Array(4)].map((_, index) => (
+                <ProductCardSkeleton key={index} />
+              ))}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
@@ -75,47 +96,6 @@ const Home: React.FC = () => {
               Tüm Koleksiyonu Görüntüle
             </Button>
           </motion.div>
-        </div>
-      </section>
-
-      <section className="py-20 bg-gray-50">
-        <div className="container mx-auto px-6 lg:px-12">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
-              <img
-                src="https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?w=800&q=80"
-                alt="Hakkımızda"
-                className="w-full h-[600px] object-cover"
-              />
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
-              <h2 className="font-display text-4xl md:text-5xl text-black mb-6">
-                Lüksü Yeniden Tanımlıyoruz
-              </h2>
-              <p className="font-body text-gray-700 text-lg mb-6 leading-relaxed">
-                ZARAFET'te gerçek lüksün detaylarda gizli olduğuna inanıyoruz. Koleksiyonumuzdaki her parça,
-                sofistikeliği, kaliteyi ve zamansız stili yansıtmak için özenle seçilmiştir.
-              </p>
-              <p className="font-body text-gray-700 text-lg mb-8 leading-relaxed">
-                İtalyan terzilikten Fransız couture'üne kadar, küresel zanaat ağımız her giysi parçasının 
-                en yüksek işçilik standartlarını karşılamasını sağlar.
-              </p>
-              <Button variant="primary" size="lg" onClick={() => navigate('/about')}>
-                Hikayemiz
-              </Button>
-            </motion.div>
-          </div>
         </div>
       </section>
     </div>

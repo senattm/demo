@@ -6,6 +6,7 @@ import { Product } from '@/types';
 import { useCartStore } from '@/store/useCartStore';
 import { useNotificationStore } from '@/store/useNotificationStore';
 import { useFavoritesStore } from '@/store/useFavoritesStore';
+import { ProductDetailSkeleton } from '@/components/Skeleton';
 import Button from '@/components/Button';
 
 const ProductDetail: React.FC = () => {
@@ -60,11 +61,7 @@ const ProductDetail: React.FC = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black"></div>
-      </div>
-    );
+    return <ProductDetailSkeleton />;
   }
 
   if (!product) {

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useCartStore } from "@/store/useCartStore";
 import { useNotificationStore } from "@/store/useNotificationStore";
+import { FREE_SHIPPING_THRESHOLD, SHIPPING_COST } from "@/constants";
 import Button from "@/components/Button";
 
 const Cart: React.FC = () => {
@@ -17,8 +18,6 @@ const Cart: React.FC = () => {
     productName: string;
   } | null>(null);
 
-  const FREE_SHIPPING_THRESHOLD = 2000;
-  const SHIPPING_COST = 50;
   const totalPrice = getTotalPrice();
   const shippingCost =
     totalPrice >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
